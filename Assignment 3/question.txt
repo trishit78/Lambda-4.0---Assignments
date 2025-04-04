@@ -55,4 +55,4 @@ Advanced Queries
     Find listings that have never been reviewed.
     Get the top 3 highest-rated properties.
     List the most active guests(users who made the most bookings).
-    
+
