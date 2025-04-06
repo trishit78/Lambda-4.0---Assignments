@@ -1,6 +1,12 @@
 create database airbnb_db;
 
+DROP DATABASE airbnb_db;
+
+show databases;
+
 use airbnb_db;
+
+show tables;
 
 create table users(id INT auto_increment PRIMARY KEY,
 fullName varchar(15) NOT NULL,
@@ -12,7 +18,8 @@ signup_date Date NOT NULL
 
 desc users;
 
-drop table reviews;
+drop table users;
+
 
 create table listings(id INT auto_increment PRIMARY KEY ,
 title varchar(30) NOT NULL,
@@ -153,6 +160,13 @@ INSERT INTO listings (title, host_id, l_description, price_per_night, city, coun
 ('Mountain Lodge', 2, 'Ski retreat', 250, 'Denver', 'USA', 4, 3);
 
 
+INSERT INTO listings (title, host_id, l_description, price_per_night, city, country, no_of_bedrooms, no_of_bathrooms) VALUES
+('Cozy Studio', 2, 'Comfortable and cozy', 50, 'New York', 'USA', 1, 1),
+('Luxury Villa', 5, 'Beachfront villa', 300, 'Miami', 'USA', 5, 4),
+('Downtown Apartment', 7, 'Close to everything', 120, 'Chicago', 'USA', 2, 2),
+('Cabin in Woods', 2, 'Nature getaway', 80, 'Asheville', 'USA', 2, 1);
+
+
 
 INSERT INTO bookings (id, guest_id, listing_id, start_date, end_date, total_price, booking_status) VALUES
 (1, 1, 1, '2025-04-10', '2025-04-12', 100, 'confirmed'),
@@ -191,4 +205,42 @@ INSERT INTO payments (id, booking_id, amount_paid, payment_method, payment_statu
 (8, 8, 1200, 'PayPal', 'accepted'),
 (9, 9, 120, 'Debit Card', 'accepted'),
 (10, 10, 1000, 'Credit Card', 'accepted');
+
+
+
+select * from users;
+select * from listings;
+select * from bookings;
+select * from reviews;
+select * from payments;
+
+update users  set fullname ='Trishit Bhowmik' , ph_no =134134  where id=1;
+delete from users where id=10;
+
+
+
+-- Count total listings per city.
+select city, count(city) as l_city from listings group by city;
+
+
+-- Find the average rating of each listing.
+select avg(rating) from reviews ;
+
+
+-- Get the total revenue earned by each host.
+select 
+u.id as hostId,
+u.fullname as hostName,
+SUM(b.total_price) as total_revenue
+from  users u
+join listings l on l.host_id = u.id
+join bookings b on b.listing_id = l.id
+where
+b.booking_status = 'confirmed'
+group by u.id,u.fullname
+order by total_revenue DESC;
+
+-- Show the number of bookings per month.
+select YEAR(start_date) as this_year,MONTH(end_date) as this_month,count(*) as no_of_bookings from bookings group by YEAR(start_date),MONTH(end_date)
+order by YEAR(start_date),MONTH(end_date);
 
