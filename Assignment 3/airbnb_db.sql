@@ -16,9 +16,9 @@ account_type enum('guest','host') NOT NULL,
 signup_date Date NOT NULL
 );
 
-desc users;
+desc listings;
 
-drop table users;
+drop table listings;
 
 
 create table listings(id INT auto_increment PRIMARY KEY ,
@@ -194,6 +194,13 @@ INSERT INTO reviews (guest_id, listing_id, rating, review_text) VALUES
 (6, 10, 5, 'Perfect for a ski trip!');
 
 
+INSERT INTO reviews (guest_id, listing_id, rating, review_text) VALUES
+(1, 1, 2, 'Awesome stay!'),
+(3, 2, 5, 'Loved the beach view.'),
+(4, 3, 2, 'Good but noisy at night.'),
+(6, 4, 4, 'Perfect nature escape!');
+
+
 INSERT INTO payments (id, booking_id, amount_paid, payment_method, payment_status) VALUES
 (1, 1, 100, 'Credit Card', 'accepted'),
 (2, 2, 1200, 'PayPal', 'accepted'),
@@ -219,15 +226,11 @@ delete from users where id=10;
 
 
 
--- Count total listings per city.
+
 select city, count(city) as l_city from listings group by city;
 
-
--- Find the average rating of each listing.
 select avg(rating) from reviews ;
 
-
--- Get the total revenue earned by each host.
 select 
 u.id as hostId,
 u.fullname as hostName,
@@ -240,7 +243,51 @@ b.booking_status = 'confirmed'
 group by u.id,u.fullname
 order by total_revenue DESC;
 
--- Show the number of bookings per month.
+
 select YEAR(start_date) as this_year,MONTH(end_date) as this_month,count(*) as no_of_bookings from bookings group by YEAR(start_date),MONTH(end_date)
 order by YEAR(start_date),MONTH(end_date);
 
+
+-- Retrieve all bookings along with guest and listing details.
+select *
+from listings l
+join bookings b 
+where b.listing_id = l.id
+
+
+-- Show listings with their average rating(using JOIN)
+select distinct l.title,avg(r.rating)
+from listings l 
+join reviews r
+on r.listing_id = l.id
+group by l.title,l.id;
+
+
+-- Find hosts who have never recieved a booking.
+select * 
+from users u
+join listings l
+on u.id = l.id
+left join bookings b
+on u.id = l.id
+where b.id=NULL;
+
+
+-- Get the most booked property in the database
+select l.title, count(b.id) as total_bookings
+from listings l
+join bookings b
+on l.id = b.listing_id
+group by l.id,l.title
+order by total_bookings DESC
+LIMIT 1;
+
+-- Retrieve all guests who have spent more than $1000 in total bookings.
+-- select u.id,u.fullname,u.email,u.ph_no
+select *
+from bookings b 
+join users u
+on b.guest_id = u.id
+where b.total_price>1000;
+
+desc users;
